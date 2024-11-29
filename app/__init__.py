@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_login import LoginManager
+from flask_migrate import Migrate
 from .models import db
 
 def create_app():
@@ -10,6 +11,7 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     db.init_app(app)
+    migrate = Migrate(app, db)
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -20,7 +22,9 @@ def create_app():
         return User.query.get(int(user_id))
 
     with app.app_context():
+        print("creating all tables...")
         db.create_all()
+        print("all tables created.")
         print(app.url_map)
 
     from .routes import main  
