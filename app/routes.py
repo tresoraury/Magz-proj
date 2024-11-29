@@ -68,3 +68,20 @@ def delete_item(item_id):
     db.session.delete(item)
     db.session.commit()
     return jsonify({'id': item.id, 'name': item.name})
+
+@app.route('/add_user', methods=['POST'])
+def add_user():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    new_user = User(username=username, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({'message': 'User added', 'username': username}), 201
+
+@app.route('/add_item', methods=['POST'])
+def add_item():
+    name = request.json.get('name')
+    new_item = Item(name=name)
+    db.session.add(new_item)
+    db.session.commit()
+    return jsonify({'message': 'Item added', 'name': name}), 201
