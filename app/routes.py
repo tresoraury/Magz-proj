@@ -85,3 +85,20 @@ def add_item():
     db.session.add(new_item)
     db.session.commit()
     return jsonify({'message': 'Item added', 'name': name}), 201
+
+
+@main.route('/items', methods=['GET'])
+def item_page():
+    items = Item.query.all()
+    return render_template('items.html', items=items)
+
+@main.route('/add_item_page', methods=['GET', 'POST'])
+def add_item_page():
+    if request.method == 'POST':
+        item_name = request.form['name']
+        new_item = Item(name=item_name)
+        db.session.add(new_item)
+        db.session.commit()
+        flash('Item added !')
+        return redirect(url_for('main.item_page'))
+    return render_template('add_item.html')
