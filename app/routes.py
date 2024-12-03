@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request, render_template, redirect, url_fo
 from .models import db, Item, User
 from flask_login import login_user, login_required, logout_user, LoginManager
 from werkzeug.security import generate_password_hash, check_password_hash
+import logging
 
 main = Blueprint('main', __name__)
 login_manager = LoginManager()
@@ -12,7 +13,6 @@ def load_user(user_id):
 
 @main.route('/')
 def home():
-    print("Home route accessed")
     return render_template('index.html')
 
 @main.route('/register', methods=['GET', 'POST'])
@@ -33,7 +33,7 @@ def login():
         user = User.query.filter_by(username=request.form['username']).first()
         if user and check_password_hash(user.password, request.form['password']):
             login_user(user)
-            return redirect(url_for('main.get_items'))
+            return redirect(url_for('main.item_page'))
         flash('Login failed! Please try again.')
     return render_template('login.html')
 
@@ -44,9 +44,10 @@ def logout():
     return render_template('login.html')
 
 @main.route('/items', methods=['GET'])
-def get_items():
+def item_page():
     items = Item.query.all()
-    return jsonify([{'id': item.id, 'name': item.name} for item in items])
+    logging.debug(f"Items retrieved: {items}")
+    return render_template('items.html', items=items)
 
 @main.route('/items', methods=['POST'])
 def create_item():
@@ -69,29 +70,6 @@ def delete_item(item_id):
     db.session.commit()
     return jsonify({'id': item.id, 'name': item.name})
 
-@main.route('/add_user', methods=['POST'])
-def add_user():
-    username = request.json.get('username')
-    password = request.json.get('password')
-    new_user = User(username=username, password=password)
-    db.session.add(new_user)
-    db.session.commit()
-    return jsonify({'message': 'User added', 'username': username}), 201
-
-@main.route('/add_item', methods=['POST'])
-def add_item():
-    name = request.json.get('name')
-    new_item = Item(name=name)
-    db.session.add(new_item)
-    db.session.commit()
-    return jsonify({'message': 'Item added', 'name': name}), 201
-
-
-@main.route('/items', methods=['GET'])
-def item_page():
-    items = Item.query.all()
-    return render_template('items.html', items=items)
-
 @main.route('/add_item_page', methods=['GET', 'POST'])
 def add_item_page():
     if request.method == 'POST':
@@ -99,6 +77,6 @@ def add_item_page():
         new_item = Item(name=item_name)
         db.session.add(new_item)
         db.session.commit()
-        flash('Item added !')
+        flash('Item added!')
         return redirect(url_for('main.item_page'))
     return render_template('add_item.html')
