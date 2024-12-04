@@ -63,12 +63,25 @@ def update_item(item_id):
     db.session.commit()
     return jsonify({'id': item.id, 'name': item.name})
 
-@main.route('/items/<int:item_id>', methods=['DELETE'])
+@main.route('/items/<int:item_id>', methods=['POST'])
 def delete_item(item_id):
+    if request.form.get('_method') == 'DELETE':
+        item = Item.query.get_or_404(item_id)
+        db.session.delete(item)
+        db.session.commit()
+        flash('Item deleted !')
+        return redirect(url_for('main.item_page'))
+    return "method not allowed", 405
+
+@main.route('/update_item/<int:item_id>', methods=['GET', 'POST'])
+def update_item_page(item_id):
     item = Item.query.get_or_404(item_id)
-    db.session.delete(item)
-    db.session.commit()
-    return jsonify({'id': item.id, 'name': item.name})
+    if request.method == 'POST':
+        item.name = request.form['name']
+        db.session.commit()
+        flash('Item updated !')
+        return redirect(url_for('main.item_page'))
+    return render_template('update_item.html', item=item)
 
 @main.route('/add_item_page', methods=['GET', 'POST'])
 def add_item_page():
