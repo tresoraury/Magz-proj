@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Item</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1{
+            color: #333;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .button:hover {
+            background-color: #0056b3;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+            margin-top: 20px;
+        }
+
+    </style>
+<body>
+    <h1>{{ item.name }}</h1>
+
+    {% if item.image_url %}
+        {% for img in item.image_url.split(', ') %}
+            <img src="{{ url_for('static', filename=img) }}" alt="{{ item.name }}">
+        {% endfor %}
+    {% else %}
+        <p>Sorry, No Images for this Item!</p>
+    {% endif %}
+
+    <a class="button" href="{{ url_for('main.item_page') }}">Back to Items</a>
+</body>
+</head> 
+</html>

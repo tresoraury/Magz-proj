@@ -62,9 +62,10 @@
                     <td>
                         <form action="{{ url_for('main.delete_item', item_id=item.id) }}" method="POST" style="display: inline;">
                             <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="button">Delete</button>
+                            <button type="submit" class="button" style="background-color: red; color: white; border: none;">Delete</button>
                         </form>
                         <a class="button" href="{{ url_for('main.update_item_page', item_id=item.id) }}">Update</a>
+                        <a class="button" href="{{ url_for('main.view_item', item_id=item.id) }}">View</a>
                     </td>
                 </tr>
             {% endfor %}

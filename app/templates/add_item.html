@@ -63,14 +63,16 @@
     </style>
 </head>
 <body>
-    ,<header>
+    <header>
         <h1>Add Item</h1>
     </header>
     <div class="container">
-        <form method="POST">
+        <form action="{{ url_for('main.add_item_page') }}" method="POST" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="name">Item Name:</label>
                 <input type="text" id="name" name="name" class="form-control" required>
+                <label for="images">Upload Images:</label>
+                <input type="file" name="images" multiple required>
             </div>
             <button type="submit" class="button">Add Item</button>
         </form>
