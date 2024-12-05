@@ -1,8 +1,12 @@
 from flask import Flask
+from .extension import db
+from .models import Item, User
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from .models import db
 import os
+
+
 def create_app():
     app = Flask(__name__)
 

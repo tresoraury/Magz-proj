@@ -3,6 +3,9 @@ from .models import db, Item, User
 from flask_login import login_user, login_required, logout_user, LoginManager
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
+from werkzeug.utils import secure_filename
+import os
+from flask import current_app
 
 main = Blueprint('main', __name__)
 login_manager = LoginManager()
@@ -87,9 +90,57 @@ def update_item_page(item_id):
 def add_item_page():
     if request.method == 'POST':
         item_name = request.form['name']
-        new_item = Item(name=item_name)
+        image_files = request.files.getlist('images')  
+        image_urls = []
+
+        images_dir = os.path.join(current_app.root_path, 'static/images')
+        if not os.path.exists(images_dir):
+            os.makedirs(images_dir)
+
+        for image_file in image_files:
+            if image_file:
+                filename = secure_filename(image_file.filename)
+                save_path = os.path.join(images_dir, filename)
+
+                if os.path.exists(save_path):
+                    base, extension = os.path.splitext(filename)
+                    counter = 1
+                    while os.path.exists(save_path):
+                        filename = f"{base}_{counter}{extension}"
+                        save_path = os.path.join(images_dir, filename)
+                        counter += 1
+
+                try:
+                    image_file.save(save_path)
+                    image_urls.append(f'images/{filename}')
+                    logging.debug(f"Saved image: {filename}")  
+                except Exception as e:
+                    logging.error(f"Error saving file {filename}: {e}")
+                    flash('Error saving image, please try again.', 'error')
+
+        if image_urls:
+            image_url = ', '.join(image_urls)  
+        else:
+            image_url = None  
+
+        new_item = Item(name=item_name, image_url=image_url)
         db.session.add(new_item)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+            logging.info("Item added to the database.")  
+        except Exception as e:
+            logging.error("Error committing to database:", e)
+            db.session.rollback()  
+
         flash('Item added!')
         return redirect(url_for('main.item_page'))
+
     return render_template('add_item.html')
+
+@main.route('/items/<int:item_id>/view', methods=['GET'])
+def view_item(item_id):
+    item = Item.query.get_or_404(item_id)
+    if not item.image_url:
+        flash("No images for this Item !")
+    return render_template('view_item.html', item=item)
