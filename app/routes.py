@@ -112,11 +112,9 @@ def add_item_page():
 
                 try:
                     image_file.save(save_path)
-                    image_urls.append(f'images/{filename}')
-                    logging.debug(f"Saved image: {filename}")  
-                except Exception as e:
-                    logging.error(f"Error saving file {filename}: {e}")
-                    flash('Error saving image, please try again.', 'error')
+                    image_urls.append(f'images/{filename}')  
+                except Exception:
+                    flash('Error saving image, try again.', 'error')
 
         if image_urls:
             image_url = ', '.join(image_urls)  
